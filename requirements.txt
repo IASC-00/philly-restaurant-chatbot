@@ -1,0 +1,5 @@
+anthropic
+flask
+sqlalchemy
+python-dotenv
+gunicorn

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Passyunk Table Chatbot</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif;
+         background: #faf7f2; color: #1c1c1c; font-size: 14px; }
+
+  .top-bar {
+    background: #8b1a1a; color: #fff;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar .brand { font-size: 16px; font-weight: 700; }
+  .top-bar .sub   { font-size: 12px; opacity: .75; }
+  .top-bar a { color: rgba(255,255,255,.7); font-size: 13px;
+               text-decoration: none; }
+  .top-bar a:hover { color: #fff; }
+
+  .stats {
+    display: flex; gap: 16px; padding: 20px 28px;
+    background: #fff; border-bottom: 1px solid #e8e0d5;
+  }
+  .stat {
+    background: #faf7f2; border: 1px solid #e8e0d5;
+    border-radius: 10px; padding: 14px 20px; min-width: 120px;
+  }
+  .stat .num  { font-size: 26px; font-weight: 800; color: #8b1a1a; }
+  .stat .label{ font-size: 11px; color: #888; text-transform: uppercase;
+                letter-spacing: .07em; margin-top: 2px; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr;
+            gap: 0; height: calc(100vh - 112px); overflow: hidden; }
+
+  .leads-panel {
+    border-right: 1px solid #e8e0d5; overflow-y: auto;
+    background: #fff;
+  }
+  .panel-header {
+    padding: 16px 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em; color: #888;
+    border-bottom: 1px solid #e8e0d5;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: #fff; z-index: 1;
+  }
+  .panel-header a {
+    font-size: 12px; font-weight: 600; color: #8b1a1a;
+    text-decoration: none; text-transform: none; letter-spacing: 0;
+  }
+  .lead-row {
+    padding: 14px 20px; border-bottom: 1px solid #f0e8de;
+    transition: background .1s;
+  }
+  .lead-row:hover { background: #faf7f2; }
+  .lead-name  { font-weight: 600; font-size: 13.5px; }
+  .lead-email { color: #8b1a1a; font-size: 12.5px; margin: 2px 0; }
+  .lead-ctx   { font-size: 12px; color: #999; white-space: nowrap;
+                overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
+  .lead-ts    { font-size: 11px; color: #bbb; margin-top: 4px; }
+  .no-data    { padding: 32px 20px; color: #aaa; font-size: 13px;
+                text-align: center; }
+
+  .convos-panel { overflow-y: auto; background: #faf7f2; }
+
+  .session-block { margin: 16px 20px;
+                   background: #fff; border: 1px solid #e8e0d5;
+                   border-radius: 12px; overflow: hidden; }
+  .session-header {
+    padding: 10px 16px; background: #f7f3ee;
+    border-bottom: 1px solid #e8e0d5;
+    font-size: 11px; color: #999; font-family: monospace;
+  }
+  .session-messages { padding: 12px 16px; display: flex;
+                      flex-direction: column; gap: 8px; }
+  .msg-row { display: flex; gap: 8px; align-items: flex-start; }
+  .msg-row.user  { flex-direction: row-reverse; }
+  .msg-bubble {
+    max-width: 72%; padding: 8px 12px; border-radius: 12px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .msg-row.bot  .msg-bubble { background: #f0e8de; border-bottom-left-radius: 3px; }
+  .msg-row.user .msg-bubble { background: #8b1a1a; color: #fff;
+                              border-bottom-right-radius: 3px; }
+  .msg-ts { font-size: 10px; color: #bbb; padding-top: 6px;
+            white-space: nowrap; flex-shrink: 0; }
+  .msg-row.user .msg-ts { text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="brand">Passyunk Table — Admin</div>
+    <div class="sub">Chatbot Dashboard</div>
+  </div>
+  <a href="/admin/logout">Sign out</a>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num">{{ total_sessions }}</div>
+    <div class="label">Sessions</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ total_leads }}</div>
+    <div class="label">Leads</div>
+  </div>
+  <div class="stat">
+    <div class="num">
+      {% set total_msgs = namespace(n=0) %}
+      {% for _, s in sessions %}
+        {% set total_msgs.n = total_msgs.n + s.messages|length %}
+      {% endfor %}
+      {{ total_msgs.n }}
+    </div>
+    <div class="label">Messages</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="leads-panel">
+    <div class="panel-header">
+      Captured Leads
+      <a href="/admin/leads.csv">↓ CSV</a>
+    </div>
+    {% if leads %}
+      {% for lead in leads %}
+      <div class="lead-row">
+        <div class="lead-name">{{ lead.name or '(no name)' }}</div>
+        <div class="lead-email">{{ lead.email }}</div>
+        {% if lead.context %}
+        <div class="lead-ctx">{{ lead.context }}</div>
+        {% endif %}
+        <div class="lead-ts">{{ lead.ts.strftime('%b %d, %Y %H:%M UTC') }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="no-data">No leads captured yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="convos-panel">
+    <div class="panel-header" style="padding:16px 20px;">
+      All Conversations ({{ sessions|length }})
+    </div>
+
+    {% if sessions %}
+      {% for sid, s in sessions %}
+      <div class="session-block">
+        <div class="session-header">
+          {{ sid }} &nbsp;·&nbsp; {{ s.messages|length }} messages
+          &nbsp;·&nbsp; started {{ s.start.strftime('%b %d %H:%M UTC') }}
+        </div>
+        <div class="session-messages">
+          {% for msg in s.messages %}
+          <div class="msg-row {{ msg.role }}">
+            <div class="msg-bubble">{{ msg.content }}</div>
+            <div class="msg-ts">{{ msg.ts }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="no-data" style="padding:48px;">No conversations yet.</div>
+    {% endif %}
+  </div>
+
+</div>
+</body>
+</html>
