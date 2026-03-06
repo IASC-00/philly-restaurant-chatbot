@@ -83,6 +83,23 @@
   }
   .btn-ghost:hover { border-color: var(--red); }
 
+  /* ── Hero photo ── */
+  .hero-photo {
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+  }
+  .hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 50%;
+    display: block;
+  }
+  @media (max-width: 640px) {
+    .hero-photo { height: 260px; }
+  }
+
   /* ── Band ── */
   .band {
     background: var(--red); color: #fff;
@@ -231,6 +248,12 @@
       View the Menu
     </button>
   </div>
+</div>
+
+<!-- Hero photo -->
+<div class="hero-photo">
+  <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=1600&q=80&auto=format&fit=crop"
+       alt="House-made pasta at Due Sorelle" loading="lazy">
 </div>
 
 <!-- Hours band -->
