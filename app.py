@@ -131,7 +131,7 @@ def api_chat():
     if msg_count >= MAX_MESSAGES * 2:
         return jsonify({
             'reply': "We've reached the limit for this chat session. "
-                     "Please email us at hello@passyunktable.com and we'll be happy to help!",
+                     "Please email us at hello@duesorelle.com and we'll be happy to help!",
             'rate_limited': True
         })
 
@@ -234,5 +234,5 @@ def export_leads_csv():
     return Response(
         output.getvalue(),
         mimetype='text/csv',
-        headers={'Content-Disposition': 'attachment; filename=passyunk_leads.csv'}
+        headers={'Content-Disposition': 'attachment; filename=due_sorelle_leads.csv'}
     )

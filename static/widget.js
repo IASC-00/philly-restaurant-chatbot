@@ -1,17 +1,17 @@
 /**
- * Passyunk Table — Chat Widget
+ * Due Sorelle — Chat Widget
  * Drop-in: <script src="/static/widget.js"></script>
- * Customise via window.PassyunkChat config before loading.
+ * Customise via window.DueSorelleChat config before loading.
  */
 (function () {
   'use strict';
 
-  var cfg = window.PassyunkChat || {};
+  var cfg = window.DueSorelleChat || {};
   var API_URL    = cfg.apiUrl    || '/api/chat';
-  var BRAND_NAME = cfg.brandName || 'Passyunk Table';
+  var BRAND_NAME = cfg.brandName || 'Due Sorelle';
   var ACCENT     = cfg.accent    || '#8b1a1a';
   var GREETING   = cfg.greeting  ||
-    "Welcome to Passyunk Table! I'm Rosa — happy to help with reservations, menu questions, or catering inquiries. What can I do for you?";
+    "Welcome to Due Sorelle! I'm Rosa — happy to help with reservations, menu questions, or catering inquiries. What can I do for you?";
 
   // ── Session ID ──────────────────────────────────────────────────────────────
   function getSessionId() {

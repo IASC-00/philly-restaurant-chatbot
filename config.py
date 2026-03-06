@@ -13,7 +13,7 @@ DB_PATH           = os.getenv('DB_PATH', 'chatbot.db')
 MAX_MESSAGES      = int(os.getenv('MAX_MESSAGES_PER_SESSION', '20'))
 SUMMARIZE_AFTER   = int(os.getenv('SUMMARIZE_AFTER_TURNS', '10'))
 
-_PROMPT_PATH = Path(__file__).parent / 'prompts' / 'passyunk_table.txt'
+_PROMPT_PATH = Path(__file__).parent / 'prompts' / 'due_sorelle.txt'
 _PROMPT_TEMPLATE = _PROMPT_PATH.read_text()
 
 
