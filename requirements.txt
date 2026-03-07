@@ -1,4 +1,5 @@
 anthropic
+groq
 flask
 sqlalchemy
 python-dotenv

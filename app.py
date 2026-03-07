@@ -5,13 +5,12 @@ import re
 from datetime import datetime, timezone
 from functools import wraps
 
-import anthropic
 from flask import (Flask, jsonify, render_template, request,
                    session, redirect, url_for, Response, abort)
 
-from config import (ANTHROPIC_API_KEY, CHAT_MODEL, ADMIN_PASSWORD,
-                    SECRET_KEY, DB_PATH, MAX_MESSAGES, SUMMARIZE_AFTER,
-                    build_system_prompt)
+from config import (ADMIN_PASSWORD, SECRET_KEY, DB_PATH,
+                    MAX_MESSAGES, SUMMARIZE_AFTER, build_system_prompt)
+from ai_client import chat_complete
 from models import Conversation, Lead, init_db
 
 # ── App setup ─────────────────────────────────────────────────────────────────
@@ -20,7 +19,6 @@ app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 _, DBSession = init_db(DB_PATH)
-claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -70,13 +68,11 @@ def summarize_history(history: list[dict]) -> list[dict]:
     recent       = history[-6:]
 
     text = '\n'.join(f"{m['role'].upper()}: {m['content']}" for m in to_summarize)
-    response = claude.messages.create(
-        model=CHAT_MODEL,
-        max_tokens=300,
+    summary = chat_complete(
         system='You summarize chat transcripts in 1–2 sentences, preserving key facts.',
         messages=[{'role': 'user', 'content': f'Summarize this conversation:\n\n{text}'}],
+        max_tokens=300,
     )
-    summary = response.content[0].text
     return [{'role': 'user', 'content': f'[Earlier conversation summary: {summary}]'},
             {'role': 'assistant', 'content': 'Got it, I have context from earlier in our chat.'},
             *recent]
@@ -147,14 +143,12 @@ def api_chat():
     history.append({'role': 'user', 'content': user_msg})
 
     try:
-        response = claude.messages.create(
-            model=CHAT_MODEL,
-            max_tokens=512,
+        reply = chat_complete(
             system=build_system_prompt(),
             messages=history,
+            max_tokens=512,
         )
-        reply = response.content[0].text
-    except anthropic.APIError as e:
+    except Exception as e:
         return jsonify({'error': str(e)}), 502
 
     save_message(session_id, 'assistant', reply)

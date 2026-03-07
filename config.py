@@ -7,6 +7,8 @@ load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
 CHAT_MODEL        = os.getenv('CHAT_MODEL', 'claude-haiku-4-5-20251001')
+GROQ_API_KEY      = os.getenv('GROQ_API_KEY', '')
+GROQ_MODEL        = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 ADMIN_PASSWORD    = os.getenv('ADMIN_PASSWORD', 'changeme')
 SECRET_KEY        = os.getenv('FLASK_SECRET_KEY', 'dev-secret-change-me')
 DB_PATH           = os.getenv('DB_PATH', 'chatbot.db')
